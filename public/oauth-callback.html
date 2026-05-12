@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pet Spa — Iniciando sesión...</title>
+<link rel="stylesheet" href="css/style.css">
+<style>body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--cream)}</style>
+</head>
+<body>
+<div style="text-align:center">
+  <div style="font-family:var(--font-display);font-size:2rem;margin-bottom:16px">🐾 PetSpa</div>
+  <div class="spinner spinner-dark"></div>
+  <p style="margin-top:16px;color:var(--gray)">Iniciando sesión con Google...</p>
+  <p id="msg-error" style="color:var(--terracotta);display:none;margin-top:12px"></p>
+</div>
+<script src="js/app.js"></script>
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const googleError = params.get('google_error');
+
+  if (googleError) {
+    document.getElementById('msg-error').style.display = 'block';
+    const msgs = {
+      cancelado: 'Cancelaste el inicio de sesión con Google.',
+      token:     'Error al obtener el token de Google.',
+      userinfo:  'No se pudo obtener tu información de Google.',
+      registro:  'Error al crear tu cuenta.',
+    };
+    document.getElementById('msg-error').textContent = msgs[googleError] || 'Error con Google OAuth.';
+    setTimeout(() => window.location.href = '/login.html', 3000);
+    return;
+  }
+
+  const token   = params.get('token');
+  const refresh = params.get('refresh');
+  const userStr = params.get('user');
+
+  if (!token || !refresh || !userStr) {
+    window.location.href = '/login.html?google_error=datos';
+    return;
+  }
+
+  try {
+    const user = JSON.parse(decodeURIComponent(userStr));
+    Auth.save(token, refresh, user);
+    window.location.href = '/dashboard.html';
+  } catch(e) {
+    window.location.href = '/login.html';
+  }
+})();
+</script>
+</body>
+</html>

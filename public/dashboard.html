@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pet Spa — Panel</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">🐾 Pet<span>Spa</span></div>
+      <div class="logo-sub">Sistema de Gestión</div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="avatar-initials">?</div>
+        <div class="user-info">
+          <div class="user-name" id="user-display-name">—</div>
+          <div class="user-role" id="user-display-role">—</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" aria-label="Menú">☰</button>
+        <span class="topbar-title" id="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-actions">
+        <span class="text-small text-muted" id="topbar-rol"></span>
+        <button class="btn btn-secondary btn-sm" onclick="doLogout()">Salir</button>
+      </div>
+    </header>
+    <main class="page-body" id="page-content">
+      <div class="flex-center" style="padding:80px">
+        <div class="spinner spinner-dark"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/pages.js"></script>
+<script>
+// Guard de autenticación
+if (!Auth.isLogged()) {
+  window.location.href = '/login.html';
+}
+
+const user = Auth.user();
+if (!user) {
+  Auth.clear();
+  window.location.href = '/login.html';
+}
+
+// Info de usuario en sidebar
+document.getElementById('avatar-initials').textContent  = iniciales(user?.email || '?');
+document.getElementById('user-display-name').textContent = (user?.email || '—').split('@')[0];
+document.getElementById('user-display-role').textContent  = user?.rol || '—';
+document.getElementById('topbar-rol').textContent         = user?.rol || '';
+
+// Nav según rol
+const navItems = {
+  admin: [
+    { icon: '⊞', label: 'Dashboard',   page: 'dashboard' },
+    { icon: '📅', label: 'Citas',       page: 'citas' },
+    { section: 'Gestión' },
+    { icon: '✂️',  label: 'Groomers',   page: 'groomers' },
+    { icon: '👥', label: 'Clientes',    page: 'clientes' },
+    { icon: '🐾', label: 'Mascotas',   page: 'mascotas' },
+    { icon: '🛁', label: 'Servicios',   page: 'servicios' },
+    { section: 'Tienda' },
+    { icon: '📦', label: 'Productos',   page: 'productos' },
+    { icon: '🧾', label: 'Facturas',    page: 'facturas' },
+    { section: 'Admin' },
+    { icon: '👤', label: 'Usuarios',    page: 'usuarios' },
+    { icon: '📊', label: 'Reportes',    page: 'reportes' },
+    { icon: '🔐', label: 'Seguridad',   page: 'seguridad' },
+  ],
+  recepcion: [
+    { icon: '⊞', label: 'Dashboard',  page: 'dashboard' },
+    { icon: '📅', label: 'Citas',      page: 'citas' },
+    { icon: '👥', label: 'Clientes',   page: 'clientes' },
+    { icon: '🐾', label: 'Mascotas',  page: 'mascotas' },
+    { icon: '🧾', label: 'Facturas',   page: 'facturas' },
+    { icon: '📦', label: 'Productos',  page: 'productos' },
+  ],
+  groomer: [
+    { icon: '📅', label: 'Mis Citas',  page: 'citas' },
+    { icon: '📋', label: 'Fichas',     page: 'fichas' },
+    { icon: '🐾', label: 'Mascotas',  page: 'mascotas' },
+  ],
+  cliente: [
+    { icon: '📅', label: 'Mis Citas',    page: 'citas' },
+    { icon: '🐾', label: 'Mis Mascotas', page: 'mascotas' },
+    { icon: '🛍️',  label: 'Tienda',       page: 'tienda' },
+    { icon: '🧾', label: 'Mis Facturas', page: 'facturas' },
+    { icon: '👤', label: 'Mi Perfil',    page: 'perfil' },
+  ],
+};
+
+const rol    = user?.rol || 'cliente';
+const items  = navItems[rol] || navItems.cliente;
+const nav    = document.getElementById('sidebar-nav');
+let navHTML  = '';
+
+items.forEach(item => {
+  if (item.section) {
+    navHTML += '<div class="nav-section-title">' + item.section + '</div>';
+  } else {
+    navHTML += '<a class="nav-item" data-page="' + item.page + '" onclick="navigate(\'' + item.page + '\',\'' + item.label + '\')" style="cursor:pointer">'
+      + '<span class="nav-icon">' + item.icon + '</span>'
+      + '<span>' + item.label + '</span>'
+      + '</a>';
+  }
+});
+nav.innerHTML = navHTML;
+
+function navigate(page, title) {
+  document.getElementById('topbar-title').textContent = title || page;
+  document.getElementById('sidebar')?.classList.remove('open');
+  // Actualizar nav activo
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === page);
+  });
+  Router.go(page);
+}
+// Hacerla global para que pages.js pueda llamarla
+window.navigate = navigate;
+
+function doLogout() {
+  Http.post('/auth/logout', {}).finally(() => {
+    Auth.clear();
+    window.location.href = '/login.html';
+  });
+}
+
+// Iniciar
+resetInactivity();
+// Página inicial según rol
+const paginaInicial = (rol === 'groomer') ? 'citas' : 'dashboard';
+navigate(paginaInicial, rol === 'groomer' ? 'Mis Citas' : 'Dashboard');
+</script>
+</body>
+</html>

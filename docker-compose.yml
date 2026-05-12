@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: petspa_db
+    environment:
+      POSTGRES_DB: petspa
+      POSTGRES_USER: petspa_user
+      POSTGRES_PASSWORD: "12345678"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U petspa_user -d petspa"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: petspa_app
+    environment:
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: petspa
+      DB_USER: petspa_user
+      DB_PASS: "12345678"
+      JWT_SECRET: "petspa_jwt_secreto_muy_largo_2024_xyz_abc"
+      APP_URL: "http://localhost:8080"
+
+      # GOOGLE OAUTH — tus credenciales reales
+      GOOGLE_CLIENT_ID: "833167752687-rp9jath0vonf7vf3cod9pgerjgtuvegc.apps.googleusercontent.com"
+      GOOGLE_CLIENT_SECRET: "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"
+      GOOGLE_REDIRECT_URI: "http://localhost:8080/auth/google/callback"
+
+      # EMAIL — necesitas configurar esto con tu correo
+      MAIL_HOST: "smtp.gmail.com"
+      MAIL_PORT: "587"
+      MAIL_USER: "rosiomasielchirinosticona@gmail.com"
+      MAIL_PASS: "asre pcdr xmit nxho"
+      MAIL_FROM: "rosiomasielchirinosticona@gmail.com"
+      MAIL_FROM_NAME: "Pet Spa"
+
+    volumes:
+      - ./uploads:/var/www/html/uploads
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

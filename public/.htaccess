@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# CRÍTICO: pasar el header Authorization a PHP
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# No reescribir archivos o carpetas que existen
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va a index.php
+RewriteRule ^ index.php [QSA,L]

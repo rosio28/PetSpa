@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pet Spa — Acceso</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: var(--cream); }
+
+  .auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Panel izquierdo — ilustrativo */
+  .auth-panel {
+    background: var(--charcoal);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 48px;
+    overflow: hidden;
+  }
+  .auth-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 20% 20%, rgba(122,158,135,.25) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(196,113,74,.18) 0%, transparent 60%);
+  }
+  .panel-pattern {
+    position: absolute;
+    top: 0; right: 0;
+    width: 280px; height: 280px;
+    opacity: .06;
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--cream) 0,
+      var(--cream) 1px,
+      transparent 0,
+      transparent 50%
+    );
+    background-size: 20px 20px;
+  }
+  .panel-big-text {
+    position: absolute;
+    top: 40px; left: 48px;
+    font-family: var(--font-display);
+    font-size: 5rem;
+    font-style: italic;
+    color: rgba(255,255,255,.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+  .panel-paw {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8rem;
+    opacity: .05;
+    pointer-events: none;
+  }
+  .panel-content { position: relative; z-index: 1; }
+  .panel-tag {
+    display: inline-block;
+    background: rgba(122,158,135,.25);
+    color: var(--sage-light);
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(168,196,176,.25);
+  }
+  .panel-headline {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .panel-headline em { color: var(--sage-light); font-style: italic; }
+  .panel-desc {
+    color: rgba(255,255,255,.55);
+    font-size: .9rem;
+    line-height: 1.7;
+    max-width: 320px;
+  }
+  .panel-features {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .panel-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255,255,255,.7);
+    font-size: .85rem;
+  }
+  .panel-feature-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sage-light);
+    flex-shrink: 0;
+  }
+
+  /* Panel derecho — formulario */
+  .auth-form-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px;
+  }
+  .auth-box {
+    width: 100%;
+    max-width: 400px;
+  }
+  .auth-logo {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+  .auth-logo span { color: var(--sage); }
+  .auth-subtitle {
+    color: var(--gray);
+    font-size: .875rem;
+    margin-bottom: 32px;
+  }
+
+  .auth-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--sand);
+    margin-bottom: 28px;
+  }
+  .auth-tab {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--gray);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--transition);
+  }
+  .auth-tab.active {
+    color: var(--charcoal);
+  }
+  .auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0;
+    height: 2px;
+    background: var(--sage);
+  }
+
+  .btn-google {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px;
+    border: 1.5px solid var(--sand-dark);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: all var(--transition);
+    margin-bottom: 20px;
+  }
+  .btn-google:hover { background: var(--cream); border-color: var(--sage-light); }
+  .btn-google svg { width: 18px; height: 18px; }
+
+  .auth-divider {
+    text-align: center;
+    position: relative;
+    margin-bottom: 20px;
+    color: var(--gray-light);
+    font-size: .8rem;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 42%;
+    height: 1px;
+    background: var(--sand);
+  }
+  .auth-divider::before { left: 0; }
+  .auth-divider::after  { right: 0; }
+
+  .forgot-link {
+    font-size: .8rem;
+    color: var(--sage-dark);
+    float: right;
+    margin-top: -10px;
+    margin-bottom: 12px;
+  }
+  .forgot-link:hover { text-decoration: underline; }
+
+  .two-fa-box {
+    background: var(--cream);
+    border: 1.5px solid var(--sand-dark);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .two-fa-icon { font-size: 2rem; margin-bottom: 8px; }
+  .two-fa-title { font-weight: 600; font-size: .95rem; margin-bottom: 4px; }
+  .two-fa-desc  { font-size: .8rem; color: var(--gray); }
+
+  @media (max-width: 768px) {
+    .auth-wrap { grid-template-columns: 1fr; }
+    .auth-panel { display: none; }
+    .auth-form-wrap { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="auth-wrap">
+  <!-- Panel izquierdo -->
+  <div class="auth-panel">
+    <div class="panel-pattern"></div>
+    <div class="panel-big-text">Pet Spa</div>
+    <div class="panel-paw">🐾</div>
+    <div class="panel-content">
+      <span class="panel-tag">Sistema de Gestión</span>
+      <h1 class="panel-headline">
+        Cuidado<br>
+        <em>profesional</em><br>
+        para tus mascotas
+      </h1>
+      <p class="panel-desc">
+        Administra citas, groomers, clientes y todo el spa desde un solo lugar.
+      </p>
+      <div class="panel-features">
+        <div class="panel-feature">
+          <div class="panel-feature-dot"></div>
+          Agenda inteligente con disponibilidad en tiempo real
+        </div>
+        <div class="panel-feature">
+          <div class="panel-feature-dot"></div>
+          Fichas de grooming con fotos antes/después
+        </div>
+        <div class="panel-feature">
+          <div class="panel-feature-dot"></div>
+          Facturación, inventario y reportes ejecutivos
+        </div>
+        <div class="panel-feature">
+          <div class="panel-feature-dot"></div>
+          Notificaciones automáticas vía WhatsApp y email
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel formulario -->
+  <div class="auth-form-wrap">
+    <div class="auth-box">
+      <div class="auth-logo">Pet<span>Spa</span> 🐾</div>
+      <p class="auth-subtitle">Bienvenido de vuelta</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</button>
+        <button class="auth-tab" onclick="switchTab('register')">Crear cuenta</button>
+      </div>
+
+      <!-- Login -->
+      <div id="form-login">
+        <div id="msg-login"></div>
+
+        <!-- 2FA box (oculto hasta necesitarlo) -->
+        <div id="box-2fa" class="two-fa-box hidden">
+          <div class="two-fa-icon">🔐</div>
+          <div class="two-fa-title">Verificación de dos factores</div>
+          <div class="two-fa-desc">Ingresa el código de tu app de autenticación (Google Authenticator)</div>
+        </div>
+
+        <!-- Google OAuth -->
+        <button class="btn-google" onclick="loginGoogle()">
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+  </svg>
+  Continuar con Google
+</button>
+
+        <div class="auth-divider">o con tu correo</div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-email">Correo electrónico</label>
+          <input class="form-control" type="email" id="login-email" placeholder="tu@correo.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-pass">Contraseña</label>
+          <input class="form-control" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+          <a href="#" class="forgot-link" onclick="showForgot(event)">¿Olvidé mi contraseña?</a>
+        </div>
+
+        <!-- Campo 2FA (oculto) -->
+        <div id="group-2fa" class="form-group hidden">
+          <label class="form-label">Código de autenticación</label>
+          <input class="form-control" type="text" id="login-2fa" placeholder="000000" maxlength="6" inputmode="numeric">
+        </div>
+
+        <button class="btn btn-primary w-full btn-lg" id="btn-login" onclick="doLogin()">
+          Iniciar sesión
+        </button>
+      </div>
+
+      <!-- Register -->
+      <!-- Register -->
+<div id="form-register" class="hidden">
+
+  <!-- El mensaje va ABAJO del formulario, no arriba -->
+  <button class="btn-google" onclick="loginGoogle()">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+    </svg>
+    Registrarse con Google
+  </button>
+
+  <div class="auth-divider">o con tu correo</div>
+
+  <div class="grid-2">
+    <div class="form-group">
+      <label class="form-label">Nombre completo</label>
+      <input class="form-control" type="text" id="reg-nombre" placeholder="Juan Pérez">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Teléfono</label>
+      <input class="form-control" type="tel" id="reg-telefono" placeholder="70000000">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Correo electrónico</label>
+    <input class="form-control" type="email" id="reg-email" placeholder="tu@correo.com">
+  </div>
+  <div class="form-group">
+    <label class="form-label">CI / Cédula</label>
+    <input class="form-control" type="text" id="reg-ci" placeholder="1234567">
+  </div>
+  <div class="form-group">
+    <label class="form-label">Contraseña</label>
+    <input class="form-control" type="password" id="reg-pass"
+      placeholder="Ej: MiPerro@2024">
+    <div id="strength-wrap" class="password-strength">
+      <div class="password-strength-bar"></div>
+    </div>
+    <div class="strength-label text-muted text-small mt-8" id="strength-label">
+      Debe tener mayúscula, número y símbolo (* # ! @ $ % ^ &)
+    </div>
+  </div>
+
+  <button class="btn btn-primary w-full btn-lg" id="btn-register" onclick="doRegister()">
+    Crear cuenta
+  </button>
+
+  <!-- Mensaje ABAJO del botón -->
+  <div id="msg-register" class="mt-16"></div>
+
+  <p class="text-muted text-small mt-16" style="text-align:center">
+    Al registrarte recibirás un email de activación válido por <strong>15 minutos</strong>.
+  </p>
+</div>
+
+      <!-- Forgot password (inline) -->
+      <div id="form-forgot" class="hidden">
+        <div id="msg-forgot"></div>
+        <p class="text-muted text-small mb-16">
+          Ingresa tu correo y te enviaremos instrucciones para recuperar tu contraseña.
+        </p>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input class="form-control" type="email" id="forgot-email" placeholder="tu@correo.com">
+        </div>
+        <button class="btn btn-primary w-full" onclick="doForgot()">Enviar instrucciones</button>
+        <button class="btn btn-secondary w-full mt-8" onclick="switchTab('login')">Volver al login</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<!-- Agregar en el <head> de login.html -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+// Redirigir si ya está logueado
+if (Auth.isLogged()) { window.location.href = '/dashboard.html'; }
+
+// Medidor de fuerza
+document.getElementById('reg-pass')?.addEventListener('input', function() {
+  const val = this.value;
+  let score = 0;
+  if (val.length >= 8)         score++;
+  if (val.length >= 12)        score++;
+  if (/[A-Z]/.test(val))      score++;
+  if (/[0-9]/.test(val))      score++;
+  if (/[*#!@$%^&]/.test(val)) score++;
+  const level = score <= 2 ? 'débil' : score <= 3 ? 'media' : 'fuerte';
+  document.getElementById('strength-wrap').className = 'password-strength strength-' + level;
+  document.getElementById('strength-label').textContent = 'Fuerza: ' + level;
+});
+
+function switchTab(tab) {
+  ['login','register','forgot'].forEach(t => {
+    document.getElementById('form-' + t)?.classList.add('hidden');
+  });
+  document.getElementById('form-' + tab)?.classList.remove('hidden');
+  document.querySelectorAll('.auth-tab').forEach((el, i) => {
+    el.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'));
+  });
+}
+function showForgot(e) { e.preventDefault(); switchTab('forgot'); }
+
+function showMsg(id, msg, type) {
+  type = type || 'error';
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>';
+}
+
+let _requireTwoFa = false;
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const code  = document.getElementById('login-2fa')?.value?.trim() || '';
+  const btn   = document.getElementById('btn-login');
+
+  if (!email || !pass) { showMsg('msg-login', 'Ingresa email y contraseña'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  const body = { email, password: pass };
+  if (_requireTwoFa && code) body.totp_code = code;
+
+  try {
+    const res = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(r => r.json());
+
+    btn.disabled = false;
+    btn.innerHTML = 'Iniciar sesión';
+
+    if (res.require_2fa) {
+      _requireTwoFa = true;
+      document.getElementById('box-2fa')?.classList.remove('hidden');
+      document.getElementById('group-2fa')?.classList.remove('hidden');
+      showMsg('msg-login', 'Ingresa el código de tu app de autenticación', 'info');
+      return;
+    }
+
+    if (!res.success) {
+      showMsg('msg-login', res.message || 'Credenciales incorrectas');
+      return;
+    }
+
+    // Guardar sesión
+    Auth.save(res.data.token, res.data.refresh_token, res.data.usuario);
+    window.location.href = '/dashboard.html';
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Iniciar sesión';
+    showMsg('msg-login', 'Error de conexión con el servidor');
+  }
+}
+
+document.getElementById('login-pass')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('login-email')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+async function doRegister() {
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  const body = {
+    nombre:   document.getElementById('reg-nombre').value.trim(),
+    telefono: document.getElementById('reg-telefono').value.trim(),
+    email:    document.getElementById('reg-email').value.trim(),
+    ci:       document.getElementById('reg-ci').value.trim(),
+    password: document.getElementById('reg-pass').value,
+  };
+
+  if (!body.nombre || !body.email || !body.password) {
+    showMsg('msg-register', 'Nombre, email y contraseña son obligatorios');
+    btn.disabled = false; btn.innerHTML = 'Crear cuenta'; return;
+  }
+
+  try {
+    const res = await fetch('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(r => r.json());
+
+    btn.disabled = false;
+    btn.innerHTML = 'Crear cuenta';
+
+    if (res.success) {
+  const devLink = res.data?.activation_link_dev;
+  const enviado = res.data?.email_enviado;
+
+  let contenido = '';
+  if (enviado) {
+    contenido = `
+      <div class="alert alert-success">
+        ✅ <strong>¡Cuenta creada!</strong><br>
+        Te enviamos el link de activación a <strong>${res.data?.email || body.email}</strong>.<br>
+        <small>⏰ El link expira en 15 minutos. Revisa también tu carpeta de spam.</small>
+      </div>`;
+  } else {
+    contenido = `
+      <div class="alert alert-warning">
+        ✅ Cuenta creada.<br>
+        <small>Email no disponible en este momento. Usa el link de desarrollo:</small><br>
+        <a href="${devLink}" style="color:var(--sage-dark);word-break:break-all;font-size:.8rem">${devLink}</a>
+      </div>`;
+  }
+  document.getElementById('msg-register').innerHTML = contenido;
+  btn.disabled = false;
+  btn.innerHTML = 'Crear cuenta';
+  return;
+}
+
+    // En desarrollo el link viene en la respuesta
+    const devLink = res.data?.activation_link_dev;
+    let msgExtra = devLink
+      ? '<br><br><strong>Modo desarrollo — link de activación:</strong><br><a href="' + devLink + '" style="word-break:break-all;color:var(--sage-dark)">' + devLink + '</a>'
+      : '';
+
+    showMsg('msg-register',
+      '✓ Cuenta creada. Revisa tu correo para activarla (el link expira en 15 minutos).' + msgExtra,
+      'success');
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = 'Crear cuenta';
+    showMsg('msg-register', 'Error de conexión con el servidor');
+  }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { showMsg('msg-forgot', 'Ingresa tu email'); return; }
+
+  const btn = document.createElement('button');
+
+  try {
+    const res = await fetch('/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    }).then(r => r.json());
+
+    if (res?.data?.reset_link_dev) {
+      // Modo desarrollo — mostrar el link directamente
+      showMsg('msg-forgot',
+        '⚠️ Email no configurado. Link de recuperación (solo desarrollo):<br><br>' +
+        '<a href="' + res.data.reset_link_dev + '" style="color:var(--sage-dark);word-break:break-all">' +
+        res.data.reset_link_dev + '</a>',
+        'warning');
+    } else {
+      showMsg('msg-forgot',
+        '✅ Enviamos las instrucciones a <strong>' + email + '</strong>. Revisa tu bandeja de entrada y spam. El link expira en 15 minutos.',
+        'success');
+    }
+  } catch(e) {
+    showMsg('msg-forgot', 'Error de conexión', 'error');
+  }
+}
+
+function switchForgotTab(tab) {
+  document.getElementById('forgot-email-form').classList.toggle('hidden', tab !== 'email');
+  document.getElementById('forgot-wa-form').classList.toggle('hidden', tab !== 'whatsapp');
+  document.getElementById('tab-email-btn').classList.toggle('active', tab === 'email');
+  document.getElementById('tab-wa-btn').classList.toggle('active',  tab === 'whatsapp');
+  document.getElementById('msg-forgot').innerHTML = '';
+}
+
+async function doForgotWhatsapp() {
+  const tel = document.getElementById('forgot-telefono').value.trim();
+  if (!tel) { showMsg('msg-forgot', 'Ingresa tu número de teléfono'); return; }
+
+  try {
+    const res = await fetch('/auth/forgot-password-whatsapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ telefono: tel })
+    }).then(r => r.json());
+
+    if (res?.data?.whatsapp_link) {
+      showMsg('msg-forgot',
+        '✅ Link generado. Haz clic para abrir WhatsApp y enviar el mensaje:' +
+        '<br><br>' +
+        '<a href="' + res.data.whatsapp_link + '" target="_blank" ' +
+        'style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:white;' +
+        'padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:4px">' +
+        '💬 Abrir WhatsApp</a>' +
+        '<br><small style="color:var(--gray-light);margin-top:8px;display:block">' +
+        'Se abrirá WhatsApp con el mensaje listo. Solo presiona Enviar.</small>',
+        'success');
+    } else {
+      showMsg('msg-forgot',
+        'Si el teléfono está registrado, el link fue generado.',
+        'success');
+    }
+  } catch(e) {
+    showMsg('msg-forgot', 'Error de conexión', 'error');
+  }
+}S
+
+// Google OAuth — muestra instrucción ya que requiere CLIENT_ID configurado
+function loginGoogle() {
+  // Redirige al backend que redirige a Google
+  window.location.href = '/auth/google';
+}
+</script>
+
+</body>
+</html>
