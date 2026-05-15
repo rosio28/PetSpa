@@ -30,24 +30,26 @@ services:
       DB_NAME: petspa
       DB_USER: petspa_user
       DB_PASS: "12345678"
-      JWT_SECRET: "petspa_jwt_secreto_muy_largo_2024_xyz_abc"
+      JWT_SECRET: "petspa_jwt_secreto_muy_largo_2024_xyz_abc_def_ghi"
       APP_URL: "http://localhost:8080"
 
-      # GOOGLE OAUTH — tus credenciales reales
+      # GOOGLE OAUTH — reemplaza con tus credenciales reales
       GOOGLE_CLIENT_ID: "833167752687-rp9jath0vonf7vf3cod9pgerjgtuvegc.apps.googleusercontent.com"
       GOOGLE_CLIENT_SECRET: "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"
       GOOGLE_REDIRECT_URI: "http://localhost:8080/auth/google/callback"
 
-      # EMAIL — necesitas configurar esto con tu correo
+      # EMAIL SMTP — configura con tu cuenta Gmail o SMTP propio
       MAIL_HOST: "smtp.gmail.com"
       MAIL_PORT: "587"
       MAIL_USER: "rosiomasielchirinosticona@gmail.com"
       MAIL_PASS: "asre pcdr xmit nxho"
       MAIL_FROM: "rosiomasielchirinosticona@gmail.com"
-      MAIL_FROM_NAME: "Pet Spa"
+      MAIL_FROM_NAME: "PetSpa"
 
+    # El volumen mapea uploads del host al directorio dentro de public/
+    # para que Apache los sirva directamente sin reescritura
     volumes:
-      - ./uploads:/var/www/html/uploads
+      - ./uploads:/var/www/html/public/uploads
     ports:
       - "8080:80"
     depends_on:

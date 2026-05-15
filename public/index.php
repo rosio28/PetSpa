@@ -1,7 +1,4 @@
 <?php
-
-
-
 declare(strict_types=1);
 error_reporting(E_ALL);
 
@@ -52,77 +49,148 @@ RateLimiter::check(200, 60);
 $method = $_SERVER['REQUEST_METHOD'];
 $uri    = preg_replace('#^/api#', '', $uri);
 
-match(true) {
-    $method==='POST' && $uri==='/auth/register'            => AuthController::register(),
-    $method==='GET'  && $uri==='/auth/verify'              => AuthController::verify(),
-    $method==='POST' && $uri==='/auth/resend-verification' => AuthController::resendVerification(),
-    $method==='POST' && $uri==='/auth/login'               => (function(){ RateLimiter::auth(); AuthController::login(); })(),
-    $method==='POST' && $uri==='/auth/refresh'             => AuthController::refresh(),
-    $method==='POST' && $uri==='/auth/logout'              => AuthController::logout(),
-    $method==='POST' && $uri==='/auth/forgot-password'     => AuthController::forgotPassword(),
-    $method==='POST' && $uri==='/auth/reset-password'      => AuthController::resetPassword(),
-    $method==='GET'  && $uri==='/auth/google'              => AuthController::googleRedirect(),
-    $method==='GET'  && $uri==='/auth/google/callback'     => AuthController::googleCallback(),
-    $method==='POST' && $uri==='/auth/2fa/setup'           => AuthController::setup2FA(),
-    $method==='POST' && $uri==='/auth/2fa/confirm'         => AuthController::confirm2FA(),
-    $method==='GET'  && $uri==='/auth/check'               => SessionTimeout::check(),
-    $method==='PUT'  && $uri==='/auth/change-password'     => UsuariosController::changePassword(),
-    $method==='GET'  && $uri==='/admin/usuarios'           => UsuariosController::listar(),
-    $method==='POST' && $uri==='/admin/usuarios'           => UsuariosController::crearPersonal(),
-    $method==='PUT'  && preg_match('#^/admin/usuarios/(\d+)/estado$#',$uri,$m) => UsuariosController::cambiarEstado((int)$m[1]),
-    $method==='GET'  && $uri==='/clientes'                 => ClientesController::listar(),
-    $method==='GET'  && preg_match('#^/clientes/(\d+)$#',$uri,$m)             => ClientesController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/clientes/(\d+)$#',$uri,$m)             => ClientesController::actualizar((int)$m[1]),
-    $method==='GET'  && preg_match('#^/clientes/(\d+)/historial$#',$uri,$m)   => ClientesController::historial((int)$m[1]),
-    $method==='GET'  && $uri==='/groomers'                 => GroomersController::listar(),
-    $method==='GET'  && preg_match('#^/groomers/(\d+)$#',$uri,$m)             => GroomersController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/groomers/(\d+)$#',$uri,$m)             => GroomersController::actualizar((int)$m[1]),
-    $method==='POST' && preg_match('#^/groomers/(\d+)/disponibilidad$#',$uri,$m) => GroomersController::setDisponibilidad((int)$m[1]),
-    $method==='GET'  && preg_match('#^/groomers/(\d+)/disponibilidad$#',$uri,$m) => GroomersController::getDisponibilidad((int)$m[1]),
-    $method==='POST' && preg_match('#^/groomers/(\d+)/bloqueos$#',$uri,$m)    => GroomersController::crearBloqueo((int)$m[1]),
-    $method==='GET'  && preg_match('#^/groomers/(\d+)/bloqueos$#',$uri,$m)    => GroomersController::getBloqueos((int)$m[1]),
-    $method==='DELETE'&& preg_match('#^/groomers/bloqueos/(\d+)$#',$uri,$m)   => GroomersController::eliminarBloqueo((int)$m[1]),
-    $method==='GET'  && $uri==='/mascotas'                 => MascotasController::listar(),
-    $method==='POST' && $uri==='/mascotas'                 => MascotasController::crear(),
-    $method==='GET'  && preg_match('#^/mascotas/(\d+)$#',$uri,$m)             => MascotasController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/mascotas/(\d+)$#',$uri,$m)             => MascotasController::actualizar((int)$m[1]),
-    $method==='DELETE'&& preg_match('#^/mascotas/(\d+)$#',$uri,$m)            => MascotasController::eliminar((int)$m[1]),
-    $method==='POST' && preg_match('#^/mascotas/(\d+)/foto$#',$uri,$m)        => MascotasController::subirFoto((int)$m[1]),
-    $method==='GET'  && $uri==='/servicios'                => ServiciosController::listar(),
-    $method==='POST' && $uri==='/servicios'                => ServiciosController::crear(),
-    $method==='GET'  && preg_match('#^/servicios/(\d+)$#',$uri,$m)            => ServiciosController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/servicios/(\d+)$#',$uri,$m)            => ServiciosController::actualizar((int)$m[1]),
-    $method==='DELETE'&& preg_match('#^/servicios/(\d+)$#',$uri,$m)           => ServiciosController::eliminar((int)$m[1]),
-    $method==='GET'  && $uri==='/productos'                => ProductosController::listar(),
-    $method==='POST' && $uri==='/productos'                => ProductosController::crear(),
-    $method==='GET'  && $uri==='/productos/bajo-stock'     => ProductosController::bajoStock(),
-    $method==='GET'  && preg_match('#^/productos/(\d+)$#',$uri,$m)            => ProductosController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/productos/(\d+)$#',$uri,$m)            => ProductosController::actualizar((int)$m[1]),
-    $method==='GET'  && $uri==='/citas'                    => CitasController::listar(),
-    $method==='POST' && $uri==='/citas'                    => CitasController::crear(),
-    $method==='GET'  && $uri==='/disponibilidad'           => CitasController::disponibilidad(),
-    $method==='GET'  && preg_match('#^/citas/(\d+)$#',$uri,$m)                => CitasController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/citas/(\d+)/estado$#',$uri,$m)         => CitasController::cambiarEstado((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/citas/(\d+)/reprogramar$#',$uri,$m)    => CitasController::reprogramar((int)$m[1]),
-    $method==='GET'  && preg_match('#^/fichas/(\d+)$#',$uri,$m)               => FichasGroomingController::ver((int)$m[1]),
-    $method==='PUT'  && preg_match('#^/fichas/(\d+)$#',$uri,$m)               => FichasGroomingController::actualizar((int)$m[1]),
-    $method==='POST' && preg_match('#^/fichas/(\d+)/cerrar$#',$uri,$m)        => FichasGroomingController::cerrar((int)$m[1]),
-    $method==='POST' && preg_match('#^/fichas/(\d+)/fotos$#',$uri,$m)         => FichasGroomingController::subirFoto((int)$m[1]),
-    $method==='GET'  && $uri==='/carrito'                  => CarritoController::ver(),
-    $method==='POST' && $uri==='/carrito/agregar'          => CarritoController::agregar(),
-    $method==='POST' && $uri==='/carrito/pedido'           => CarritoController::crearPedido(),
-    $method==='DELETE'&& preg_match('#^/carrito/item/(\d+)$#',$uri,$m)        => CarritoController::eliminarItem((int)$m[1]),
-    $method==='GET'  && $uri==='/facturas'                 => FacturasController::listar(),
-    $method==='POST' && $uri==='/facturas'                 => FacturasController::crear(),
-    $method==='GET'  && preg_match('#^/facturas/(\d+)$#',$uri,$m)             => FacturasController::ver((int)$m[1]),
-    $method==='POST' && preg_match('#^/facturas/(\d+)/pago$#',$uri,$m)        => FacturasController::registrarPago((int)$m[1]),
-    $method==='GET'  && $uri==='/reportes/dashboard'           => ReportesController::dashboard(),
-    $method==='GET'  && $uri==='/reportes/ocupacion-groomers'  => ReportesController::ocupacionGroomers(),
-    $method==='GET'  && $uri==='/reportes/top-servicios'       => ReportesController::topServicios(),
-    $method==='GET'  && $uri==='/reportes/top-productos'       => ReportesController::topProductos(),
-    $method==='GET'  && $uri==='/reportes/clientes-frecuentes' => ReportesController::clientesFrecuentes(),
-    $method==='GET'  && $uri==='/reportes/cancelaciones'       => ReportesController::cancelaciones(),
-    $method==='GET'  && $uri==='/reportes/ingresos-diarios'    => ReportesController::ingresosDiarios(),
-    $method==='GET'  && $uri==='/reportes/horas-pico'          => ReportesController::horasPico(),
-    default => Response::error("Ruta no encontrada: [$method] $uri", 404),
-};
+// ─── AUTH ──────────────────────────────────────────────────────────────────
+if ($method === 'POST' && $uri === '/auth/register')              { AuthController::register(); exit; }
+if ($method === 'GET'  && $uri === '/auth/verify')                { AuthController::verify(); exit; }
+if ($method === 'POST' && $uri === '/auth/resend-verification')   { AuthController::resendVerification(); exit; }
+if ($method === 'POST' && $uri === '/auth/login')                 { RateLimiter::auth(); AuthController::login(); exit; }
+if ($method === 'POST' && $uri === '/auth/refresh')               { AuthController::refresh(); exit; }
+if ($method === 'POST' && $uri === '/auth/logout')                { AuthController::logout(); exit; }
+if ($method === 'POST' && $uri === '/auth/forgot-password')       { AuthController::forgotPassword(); exit; }
+if ($method === 'POST' && $uri === '/auth/reset-password')        { AuthController::resetPassword(); exit; }
+if ($method === 'POST' && $uri === '/auth/forgot-password-whatsapp') { AuthController::forgotPasswordWhatsapp(); exit; }
+if ($method === 'GET'  && $uri === '/auth/google')                { AuthController::googleRedirect(); exit; }
+if ($method === 'GET'  && $uri === '/auth/google/callback')       { AuthController::googleCallback(); exit; }
+if ($method === 'POST' && $uri === '/auth/2fa/setup')             { AuthController::setup2FA(); exit; }
+if ($method === 'POST' && $uri === '/auth/2fa/confirm')           { AuthController::confirm2FA(); exit; }
+if ($method === 'GET'  && $uri === '/auth/check')                 { SessionTimeout::check(); exit; }
+if ($method === 'PUT'  && $uri === '/auth/change-password')       { UsuariosController::changePassword(); exit; }
+
+// ─── ADMIN USUARIOS ─────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/admin/usuarios')             { UsuariosController::listar(); exit; }
+if ($method === 'POST' && $uri === '/admin/usuarios')             { UsuariosController::crearPersonal(); exit; }
+
+if (preg_match('#^/admin/usuarios/(\d+)/estado$#', $uri, $m)) {
+    if ($method === 'PUT') { UsuariosController::cambiarEstado((int)$m[1]); exit; }
+}
+if (preg_match('#^/admin/usuarios/(\d+)/reset-password$#', $uri, $m)) {
+    if ($method === 'POST') { UsuariosController::resetPassword((int)$m[1]); exit; }
+}
+if (preg_match('#^/admin/usuarios/(\d+)/detalle$#', $uri, $m)) {
+    if ($method === 'GET') { UsuariosController::detalle((int)$m[1]); exit; }
+}
+
+// ─── CLIENTES ───────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/clientes')                   { ClientesController::listar(); exit; }
+if (preg_match('#^/clientes/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { ClientesController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT') { ClientesController::actualizar((int)$m[1]); exit; }
+}
+if (preg_match('#^/clientes/(\d+)/historial$#', $uri, $m)) {
+    if ($method === 'GET') { ClientesController::historial((int)$m[1]); exit; }
+}
+
+// ─── GROOMERS ───────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/groomers')                   { GroomersController::listar(); exit; }
+if (preg_match('#^/groomers/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { GroomersController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT') { GroomersController::actualizar((int)$m[1]); exit; }
+}
+if (preg_match('#^/groomers/(\d+)/disponibilidad$#', $uri, $m)) {
+    if ($method === 'POST') { GroomersController::setDisponibilidad((int)$m[1]); exit; }
+    if ($method === 'GET')  { GroomersController::getDisponibilidad((int)$m[1]); exit; }
+}
+if (preg_match('#^/groomers/(\d+)/bloqueos$#', $uri, $m)) {
+    if ($method === 'POST') { GroomersController::crearBloqueo((int)$m[1]); exit; }
+    if ($method === 'GET')  { GroomersController::getBloqueos((int)$m[1]); exit; }
+}
+if (preg_match('#^/groomers/bloqueos/(\d+)$#', $uri, $m)) {
+    if ($method === 'DELETE') { GroomersController::eliminarBloqueo((int)$m[1]); exit; }
+}
+
+// ─── MASCOTAS ───────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/mascotas')                   { MascotasController::listar(); exit; }
+if ($method === 'POST' && $uri === '/mascotas')                   { MascotasController::crear(); exit; }
+if (preg_match('#^/mascotas/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET')    { MascotasController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT')    { MascotasController::actualizar((int)$m[1]); exit; }
+    if ($method === 'DELETE') { MascotasController::eliminar((int)$m[1]); exit; }
+}
+if (preg_match('#^/mascotas/(\d+)/foto$#', $uri, $m)) {
+    if ($method === 'POST') { MascotasController::subirFoto((int)$m[1]); exit; }
+}
+
+// ─── SERVICIOS ──────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/servicios')                  { ServiciosController::listar(); exit; }
+if ($method === 'POST' && $uri === '/servicios')                  { ServiciosController::crear(); exit; }
+if (preg_match('#^/servicios/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET')    { ServiciosController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT')    { ServiciosController::actualizar((int)$m[1]); exit; }
+    if ($method === 'DELETE') { ServiciosController::eliminar((int)$m[1]); exit; }
+}
+
+// ─── PRODUCTOS ──────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/productos')                  { ProductosController::listar(); exit; }
+if ($method === 'POST' && $uri === '/productos')                  { ProductosController::crear(); exit; }
+if ($method === 'GET'  && $uri === '/productos/bajo-stock')       { ProductosController::bajoStock(); exit; }
+if (preg_match('#^/productos/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { ProductosController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT') { ProductosController::actualizar((int)$m[1]); exit; }
+}
+
+// ─── CITAS ──────────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/citas')                      { CitasController::listar(); exit; }
+if ($method === 'POST' && $uri === '/citas')                      { CitasController::crear(); exit; }
+if ($method === 'GET'  && $uri === '/disponibilidad')             { CitasController::disponibilidad(); exit; }
+if (preg_match('#^/citas/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { CitasController::ver((int)$m[1]); exit; }
+}
+if (preg_match('#^/citas/(\d+)/estado$#', $uri, $m)) {
+    if ($method === 'PUT') { CitasController::cambiarEstado((int)$m[1]); exit; }
+}
+if (preg_match('#^/citas/(\d+)/reprogramar$#', $uri, $m)) {
+    if ($method === 'PUT') { CitasController::reprogramar((int)$m[1]); exit; }
+}
+
+// ─── FICHAS GROOMING ────────────────────────────────────────────────────────
+if (preg_match('#^/fichas/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { FichasGroomingController::ver((int)$m[1]); exit; }
+    if ($method === 'PUT') { FichasGroomingController::actualizar((int)$m[1]); exit; }
+}
+if (preg_match('#^/fichas/(\d+)/cerrar$#', $uri, $m)) {
+    if ($method === 'POST') { FichasGroomingController::cerrar((int)$m[1]); exit; }
+}
+if (preg_match('#^/fichas/(\d+)/fotos$#', $uri, $m)) {
+    if ($method === 'POST') { FichasGroomingController::subirFoto((int)$m[1]); exit; }
+}
+
+// ─── CARRITO / TIENDA ───────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/carrito')                    { CarritoController::ver(); exit; }
+if ($method === 'POST' && $uri === '/carrito/agregar')            { CarritoController::agregar(); exit; }
+if ($method === 'POST' && $uri === '/carrito/pedido')             { CarritoController::crearPedido(); exit; }
+if (preg_match('#^/carrito/item/(\d+)$#', $uri, $m)) {
+    if ($method === 'DELETE') { CarritoController::eliminarItem((int)$m[1]); exit; }
+}
+
+// ─── FACTURAS ───────────────────────────────────────────────────────────────
+if ($method === 'GET'  && $uri === '/facturas')                   { FacturasController::listar(); exit; }
+if ($method === 'POST' && $uri === '/facturas')                   { FacturasController::crear(); exit; }
+if (preg_match('#^/facturas/(\d+)$#', $uri, $m)) {
+    if ($method === 'GET') { FacturasController::ver((int)$m[1]); exit; }
+}
+if (preg_match('#^/facturas/(\d+)/pago$#', $uri, $m)) {
+    if ($method === 'POST') { FacturasController::registrarPago((int)$m[1]); exit; }
+}
+
+// ─── REPORTES ───────────────────────────────────────────────────────────────
+if ($method === 'GET' && $uri === '/reportes/dashboard')              { ReportesController::dashboard(); exit; }
+if ($method === 'GET' && $uri === '/reportes/ocupacion-groomers')     { ReportesController::ocupacionGroomers(); exit; }
+if ($method === 'GET' && $uri === '/reportes/top-servicios')          { ReportesController::topServicios(); exit; }
+if ($method === 'GET' && $uri === '/reportes/top-productos')          { ReportesController::topProductos(); exit; }
+if ($method === 'GET' && $uri === '/reportes/clientes-frecuentes')    { ReportesController::clientesFrecuentes(); exit; }
+if ($method === 'GET' && $uri === '/reportes/cancelaciones')          { ReportesController::cancelaciones(); exit; }
+if ($method === 'GET' && $uri === '/reportes/ingresos-diarios')       { ReportesController::ingresosDiarios(); exit; }
+if ($method === 'GET' && $uri === '/reportes/horas-pico')             { ReportesController::horasPico(); exit; }
+
+// ─── 404 ────────────────────────────────────────────────────────────────────
+Response::error("Ruta no encontrada: [$method] $uri", 404);
